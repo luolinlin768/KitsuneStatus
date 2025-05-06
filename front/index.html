@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算机状态监控</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        /* 颜色变量定义 */
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --border-color: #e0e0e0;
+            --hover-color: #f0f0f0;
+            --online-color: #2ecc71;
+            --offline-color: #e74c3c;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --border-color: #444444;
+            --hover-color: #3d3d3d;
+            --online-color: #27ae60;
+            --offline-color: #c0392b;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+        
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+        }
+        
+        .nav-links li {
+            margin-left: 1.5rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--secondary-color);
+        }
+        
+        /* 主题切换按钮 */
+        .theme-switch {
+            display: flex;
+            align-items: center;
+            margin-left: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .theme-switch i {
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        /* 主要内容区域 - 左右分栏布局 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            padding: 2rem;
+            gap: 2rem;
+        }
+        
+        /* 左栏样式 */
+        .left-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        /* 右栏样式 */
+        .right-column {
+            flex: 1;
+        }
+        
+        /* 基础信息卡片 */
+        .info-card {
+            /* background-color: var(--card-bg); */
+            background-color: var(--card-bg);
+            /* 圆角处理 */
+            border-radius: 0px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            height: 100%;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+        
+        /* 主机信息区域 */
+        .host-info {
+            margin-bottom: 1.5rem;
+        }
+        
+        .host-info p {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* 图表容器
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        } */
+        
+        .chart-box {
+            flex: 1;
+            min-width: 250px;
+            height: 250px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* 表格样式 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table th {
+            background-color: var(--hover-color);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .data-table tr:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .status-online {
+            color: var(--online-color);
+            font-weight: bold;
+        }
+        
+        .status-offline {
+            color: var(--offline-color);
+            font-weight: bold;
+        }
+        
+        .image-placeholder {
+            opacity: 0.3;
+        }
+        
+        
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .left-column, .right-column {
+                width: 100%;
+            }
+        }
+    </style>
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-logo">title</div>
+        <ul class="nav-links">
+            <li><a href="#">首页</a></li>
+            <li><a href="#">物理机</a></li>
+            <li><a href="#">虚拟机</a></li>
+            <li><a href="#">容器</a></li>
+            <li><a href="#">设置</a></li>
+            <li class="theme-switch" id="themeToggle">
+                <i class="fas fa-moon"></i>
+                <span>暗色模式</span>
+            </li>
+        </ul>
+    </nav>
+    
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+        <!-- 左栏 -->
+        <div class="left-column">
+            <!-- 主机信息卡片 -->
+            <div class="info-card">
+                <h2 class="card-title">主机信息</h2>
+                <div class="host-info">
+                    <p><strong>主机名:</strong> <span id="hostname">Server-01</span></p>
+                    <p><strong>IP地址:</strong> 192.168.1.100</p>
+                    <p><strong>操作系统:</strong> Ubuntu 20.04 LTS</p>
+                </div>
+                
+                <!-- <div class="chart-container">
+                    <div class="chart-box" id="cpu-chart"></div>
+                    <div class="chart-box" id="ram-chart"></div>
+                    <div class="chart-box" id="network-chart"></div>
+                </div> -->
+            </div>
+            
+            <!-- 虚拟机信息卡片 -->
+            <div class="info-card">
+                <h2 class="card-title">虚拟机状态信息</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>虚拟机名称</th>
+                            <th>CPU使用率</th>
+                            <th>内存使用率</th>
+                            <th>状态</th>
+                            <th>IP地址</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>VM-WebServer</td>
+                            <td>32%</td>
+                            <td>2.4GB/8GB (30%)</td>
+                            <td class="status-online">在线</td>
+                            <td>192.168.1.101</td>
+                        </tr>
+                        <tr>
+                            <td>VM-Database</td>
+                            <td>68%</td>
+                            <td>5.6GB/16GB (35%)</td>
+                            <td class="status-online">在线</td>
+                            <td>192.168.1.102</td>
+                        </tr>
+                        <tr>
+                            <td>VM-Backup</td>
+                            <td>12%</td>
+                            <td>1.2GB/4GB (30%)</td>
+                            <td class="status-online">在线</td>
+                            <td>192.168.1.103</td>
+                        </tr>
+                        <tr>
+                            <td>VM-Test</td>
+                            <td>0%</td>
+                            <td>0GB/4GB (0%)</td>
+                            <td class="status-offline">离线</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 右栏 - 容器信息 -->
+        <div class="right-column">
+            <div class="info-card">
+                <h2 class="card-title">容器状态信息</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>容器名称</th>
+                            <th>镜像</th>
+                            <th>CPU使用率</th>
+                            <th>内存使用率</th>
+                            <th>状态</th>
+                            <th>端口</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>nginx-proxy</td>
+                            <td class="image-placeholder">nginx:alpine</td>
+                            <td>8%</td>
+                            <td>45MB/256MB (17%)</td>
+                            <td class="status-online">在线</td>
+                            <td>80:80, 443:443</td>
+                        </tr>
+                        <tr>
+                            <td>mysql-db</td>
+                            <td class="image-placeholder">mysql:5.7</td>
+                            <td>22%</td>
+                            <td>1.2GB/2GB (60%)</td>
+                            <td class="status-online">在线</td>
+                            <td>3306:3306</td>
+                        </tr>
+                        <tr>
+                            <td>redis-cache</td>
+                            <td class="image-placeholder">redis:alpine</td>
+                            <td>5%</td>
+                            <td>32MB/128MB (25%)</td>
+                            <td class="status-online">在线</td>
+                            <td>6379:6379</td>
+                        </tr>
+                        <tr>
+                            <td>mongodb</td>
+                            <td class="image-placeholder">mongo:4.4</td>
+                            <td>15%</td>
+                            <td>450MB/1GB (45%)</td>
+                            <td class="status-online">在线</td>
+                            <td>27017:27017</td>
+                        </tr>
+                        <tr>
+                            <td>api-service</td>
+                            <td class="image-placeholder">node:14</td>
+                            <td>18%</td>
+                            <td>210MB/512MB (41%)</td>
+                            <td class="status-online">在线</td>
+                            <td>3000:3000</td>
+                        </tr>
+                        <tr>
+                            <td>monitoring</td>
+                            <td class="image-placeholder">grafana/grafana</td>
+                            <td>3%</td>
+                            <td>90MB/256MB (35%)</td>
+                            <td class="status-offline">离线</td>
+                            <td>3000:3000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 主题管理
+        const theme = {
+            current: localStorage.getItem('theme') || 'auto',
+            init() {
+                this.applyTheme();
+                this.setupEventListeners();
+            },
+            
+            applyTheme() {
+                let themeToApply = this.current;
+                
+                if (this.current === 'auto') {
+                    const hours = new Date().getHours();
+                    themeToApply = (hours >= 18 || hours < 6) ? 'dark' : 'light';
+                }
+                
+                document.documentElement.setAttribute('data-theme', themeToApply);
+                this.updateUI();
+                this.updateCharts(themeToApply);
+            },
+            
+            toggleTheme() {
+                const themes = ['auto', 'light', 'dark'];
+                const currentIndex = themes.indexOf(this.current);
+                this.current = themes[(currentIndex + 1) % themes.length];
+                localStorage.setItem('theme', this.current);
+                this.applyTheme();
+            },
+            
+            updateUI() {
+                const toggle = document.getElementById('themeToggle');
+                const icon = toggle.querySelector('i');
+                const text = toggle.querySelector('span');
+                
+                if (this.current === 'dark') {
+                    icon.className = 'fas fa-sun';
+                    text.textContent = '亮色模式';
+                } else if (this.current === 'light') {
+                    icon.className = 'fas fa-moon';
+                    text.textContent = '暗色模式';
+                } else {
+                    icon.className = 'fas fa-adjust';
+                    text.textContent = '自动模式';
+                }
+            },
+            
+            setupEventListeners() {
+                document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+            },
+            
+
+            
+            updateCharts(theme) {
+                if (window.cpuChart && window.ramChart && window.networkChart) {
+                    const isDark = theme === 'dark';
+                    const textColor = isDark ? '#e0e0e0' : '#333333';
+                    const backgroundColor = isDark ? '#2d2d2d' : '#ffffff';
+                    
+                    const optionUpdate = {
+                        textStyle: { color: textColor },
+                        backgroundColor: backgroundColor
+                    };
+                    
+                    window.cpuChart.setOption(optionUpdate, true);
+                    window.ramChart.setOption(optionUpdate, true);
+                    window.networkChart.setOption(optionUpdate, true);
+                }
+            }
+        };
+        
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            theme.init();
+            // initCharts();
+        });
+    </script>
+</body>
+</html>

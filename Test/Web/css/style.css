@@ -1,0 +1,154 @@
+:root {
+  --bg-color: #f0f2f5;
+  --text-color: #111;
+  --card-bg: #ffffff;
+  --border-color: #d0d0d0;
+  --accent-color: #007bff;
+  --meter-bg: #e0e0e0;
+  --meter-fill: #007bff;
+}
+
+body.dark {
+  --bg-color: #1e1e2f;
+  --text-color: #eee;
+  --card-bg: #2c2c3e;
+  --border-color: #444;
+  --accent-color: #4fa3ff;
+  --meter-bg: #333;
+  --meter-fill: #4fa3ff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 顶部 */
+.header {
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+}
+
+#theme-toggle {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-color);
+  color: var(--text-color);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* 主容器 */
+.grid-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* 分区 */
+.section {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.section h2 {
+  margin-bottom: 0.8rem;
+  font-size: 1.2rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.4rem;
+}
+
+/* 主机信息 - 新布局 */
+.host-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.host-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+}
+
+.host-info-label {
+  flex: 0 0 40%;
+  font-size: 0.95rem;
+}
+
+.host-info-progress {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.meter {
+  background: var(--meter-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  height: 10px;
+  flex: 1;
+}
+
+.meter .fill {
+  height: 100%;
+  background: var(--meter-fill);
+}
+
+/* 卡片 */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.5rem;
+}
+
+.card {
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  padding: 0.6rem;
+  border-radius: 4px;
+}
+
+.card-header {
+  font-size: 1rem;
+  color: var(--accent-color);
+  margin-bottom: 0.4rem;
+}
+
+.card p {
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+
+/* 自适应 */
+@media (max-width: 600px) {
+  .grid-container {
+    grid-template-columns: 1fr;
+  }
+}
