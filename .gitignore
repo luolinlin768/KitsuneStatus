@@ -1,5 +1,5 @@
 __pycache__/
-venv/
-clear.sh
+.venv/
 front/old/
-Test/
+
+clear.sh

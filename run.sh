@@ -4,7 +4,7 @@
 PYTHON_PATH=$(which python3.11)
 
 # 2. 检查并创建虚拟环境
-VENV_NAME="venv"
+VENV_NAME=".venv"
 if [ ! -d "$VENV_NAME" ]; then
     echo "创建虚拟环境..."
     $PYTHON_PATH -m venv $VENV_NAME

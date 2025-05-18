@@ -7,7 +7,7 @@
 在项目目录下运行以下命令以创建虚拟环境：
 
 ```bash
-python3 -m venv venv
+python3 -m venv .venv
 ```
 
 ## 激活虚拟环境
