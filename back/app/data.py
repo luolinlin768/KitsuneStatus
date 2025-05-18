@@ -28,12 +28,14 @@ def get_container_status(docker_base_url) -> dict:
             result.append(status)
         return result
     else:
+        # 异常返回无法连接
         return {
             "docker" : "我们无法连接到你的docker"
         }
 
 def get_system_info(docker_base_url) -> dict:
     client = get_docker_info(docker_base_url)
+    # if处理client可能为None的情况
     if client:
         containers = client.containers.list(all=True)
         result = {

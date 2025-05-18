@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.data import get_system_info, get_host_status, get_container_status
 
 app = FastAPI(title="只读API服务", docs_url=None)  # 关闭文档页
+
+# docker_base_url如需要可以手动指定docker套接字
 docker_base_url = 'unix:///var/run/docker.sock'
 # docker_base_url = 'tcp://192.168.3.249:2375'
 # docker_base_url = None
